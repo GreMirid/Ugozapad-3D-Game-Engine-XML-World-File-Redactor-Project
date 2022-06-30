@@ -130,7 +130,7 @@ void Redactor::on_b_choose_file_clicked()
 
 void Redactor::on_action_about_triggered()
 {
-    QMessageBox::about(this, "О Redactor", "ver 0.01 alpha\nСделан GreMirid 05.22\nДля модифицирования уровней игрого движка Ugozapad");
+    QMessageBox::about(this, "О Redactor", "ver 0.01 alpha\nСделан GreMirid\nДля модифицирования уровней игрого движка Ugozapad");
 }
 
 void Redactor::on_cb_existense_entities_currentIndexChanged(const QString &arg1)
@@ -150,10 +150,10 @@ void Redactor::on_l_entities_currentRowChanged(int currentRow)
     {
     case -1: break; //because it's clear and it's just crushing all program
     case 0:
-        ui->le_value_of_parametr->setText(entities[ui->cb_existense_entities->currentIndex()].name);
+        ui->le_value_of_parametr->setText(entities[ui->cb_existense_entities->currentIndex()].classname);
         break;
     case 1:
-        ui->le_value_of_parametr->setText(entities[ui->cb_existense_entities->currentIndex()].classname);
+        ui->le_value_of_parametr->setText(entities[ui->cb_existense_entities->currentIndex()].name);
         break;
     default:
         for(int arg_id = 0; arg_id < CurParam.argums.size(); arg_id++)
@@ -175,5 +175,28 @@ void Redactor::on_l_args_currentRowChanged(int currentRow)
     default:
         ui->le_value_of_parametr->setText(CurArg.argums[currentRow].value);
         break;
+    }
+}
+
+//Rewrite
+void Redactor::on_le_value_of_parametr_textChanged(const QString &arg1)
+{
+    if (arg1 != "" || arg1 != "Выберите Аргумент!")
+    {
+        switch (ui->l_entities->currentRow())
+        {
+        case -1: break;
+        case 0:
+            entities[ui->cb_existense_entities->currentIndex()].classname = arg1;
+            break;
+        case 1:
+            entities[ui->cb_existense_entities->currentIndex()].name = arg1;
+            ui->cb_existense_entities->setItemText(ui->cb_existense_entities->currentIndex(), arg1);
+            break;
+        default:
+            if (ui->l_args->currentRow() != -1)
+                CurArg.argums[ui->l_args->currentRow()].value = arg1;
+            break;
+        }
     }
 }
