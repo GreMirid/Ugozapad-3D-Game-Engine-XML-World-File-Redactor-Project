@@ -41,6 +41,17 @@ void Redactor::displayEntityData(const QString &data)
     }
 }
 
+void Redactor::delete_entity(const QString &entityName)
+{
+    for (int iter = 0; iter < entities.size(); iter++)
+    {
+        if (entities[iter].name == entityName)
+        {
+            entities.removeAt(iter);
+        }
+    }
+}
+
 void Redactor::it_choosen_file()
 {
     file = new QFile(fileName);
@@ -199,4 +210,11 @@ void Redactor::on_le_value_of_parametr_textChanged(const QString &arg1)
             break;
         }
     }
+}
+
+void Redactor::on_b_delete_entity_clicked()
+{
+    delete_entity(ui->cb_existense_entities->currentText());
+    ui->cb_existense_entities->removeItem(ui->cb_existense_entities->currentIndex());
+    displayEntityData(ui->cb_existense_entities->currentText());
 }

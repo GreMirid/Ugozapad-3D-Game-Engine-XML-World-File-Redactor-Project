@@ -46,14 +46,16 @@ private:
 
     void it_choosen_file();
     void it_not_choosen_file();
+    void delete_entity(const QString &entityName); // from massive
 
 private slots:
     void on_b_choose_file_clicked();
     void on_action_about_triggered();
     void on_cb_existense_entities_currentIndexChanged(const QString &arg1);
     void on_l_entities_currentRowChanged(int currentRow);
-
     void on_l_args_currentRowChanged(int currentRow);
+    void on_le_value_of_parametr_textChanged(const QString &arg1);
+    void on_b_delete_entity_clicked();
 
 private:
     Ui::Redactor *ui;
