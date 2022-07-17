@@ -1,11 +1,9 @@
 #ifndef REDACTOR_H
 #define REDACTOR_H
 
-#include <QMainWindow>
-#include <QtXml>
-#include <QFile>
-#include <QMessageBox>
-#include <QFileDialog>
+#include "new_entity.h"
+
+#include "pch.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Redactor; }
@@ -23,25 +21,6 @@ private:
     QString fileName; //.xml file what we work for
     QFile* file;
 
-    struct argument
-    {
-        QString valuename, value;
-    };
-
-    struct param
-    {
-        QString valuename;
-        QList<argument> argums;
-    };
-
-    struct entity
-    {
-        QString classname, name;
-        QList<param> params;
-    };
-
-    QList<entity> entities;
-
     void displayEntityData(const QString &data);
 
     void it_choosen_file();
@@ -56,6 +35,9 @@ private slots:
     void on_l_args_currentRowChanged(int currentRow);
     void on_le_value_of_parametr_textChanged(const QString &arg1);
     void on_b_delete_entity_clicked();
+    void on_b_add_entity_clicked();
+
+    void on_b_save_level_clicked();
 
 private:
     Ui::Redactor *ui;

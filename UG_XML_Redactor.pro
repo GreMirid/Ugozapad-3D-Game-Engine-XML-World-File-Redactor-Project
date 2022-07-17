@@ -16,13 +16,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    core.cpp \
     main.cpp \
+    new_entity.cpp \
     redactor.cpp
 
 HEADERS += \
+    core.h \
+    new_entity.h \
+    pch.h \
     redactor.h
 
 FORMS += \
+    new_entity.ui \
     redactor.ui
 
 TRANSLATIONS += \
