@@ -4,6 +4,8 @@
 Redactor::Redactor(QWidget *parent) : QMainWindow(parent), ui(new Ui::Redactor)
 {
     ui->setupUi(this);
+    it_not_choosen_file();
+    setLocaledText();
 }
 
 Redactor::~Redactor()
@@ -13,15 +15,17 @@ Redactor::~Redactor()
 
 void Redactor::it_not_choosen_file()
 {
-    ui->file_text->setText("Выберите файл игрового мира Ugozapad (.xml)");
-    ui->file_geometry->setText("Выберите файл игрового мира!");
-    ui->skybox_name->setText("Выберите файл игрового мира!");
+    ui->file_text->setText(*m_local.getCurrentTextLocale("#warning_worldfile_main"));
+    ui->file_geometry->setText(*m_local.getCurrentTextLocale("#warning_world_file"));
+    ui->skybox_name->setText(*m_local.getCurrentTextLocale("#warning_world_file"));
     ui->cb_existense_entities->clear();
     ui->l_entities->clear();
     ui->l_args->clear();
     ui->le_value_of_parametr->clear();
 
     m_entities.clear();
+
+    isFileLoaded = false;
 }
 
 void Redactor::displayEntityData(const QString &data)
@@ -46,6 +50,29 @@ void Redactor::delete_entity(const QString &entityName)
     for (int iter = 0; iter < m_entities.size(); iter++)
         if (m_entities[iter].name == entityName)
             m_entities.removeAt(iter);
+}
+
+void Redactor::setLocaledText()
+{
+    //Menu Functions
+    ui->menu->setTitle(*m_local.getCurrentTextLocale(ui->menu->title()));
+    ui->action_2->setText(*m_local.getCurrentTextLocale(ui->action_2->text()));
+    ui->action_about->setText(*m_local.getCurrentTextLocale(ui->action_about->text()));
+
+    //Labels
+    ui->file_text->setText(*m_local.getCurrentTextLocale(ui->file_text->text()));
+    ui->label_4->setText(*m_local.getCurrentTextLocale(ui->label_4->text()));
+    ui->label_5->setText(*m_local.getCurrentTextLocale(ui->label_5->text()));
+    ui->label->setText(*m_local.getCurrentTextLocale(ui->label->text()));
+    ui->label_2->setText(*m_local.getCurrentTextLocale(ui->label_2->text()));
+    ui->label_6->setText(*m_local.getCurrentTextLocale(ui->label_6->text()));
+    ui->label_3->setText(*m_local.getCurrentTextLocale(ui->label_3->text()));
+
+    //Buttons
+    ui->b_add_entity->setText(*m_local.getCurrentTextLocale(ui->b_add_entity->text()));
+    ui->b_save_level->setText(*m_local.getCurrentTextLocale(ui->b_save_level->text()));
+    ui->b_choose_file->setText(*m_local.getCurrentTextLocale(ui->b_choose_file->text()));
+    ui->b_delete_entity->setText(*m_local.getCurrentTextLocale(ui->b_delete_entity->text()));
 }
 
 void Redactor::it_choosen_file()
@@ -126,6 +153,7 @@ void Redactor::it_choosen_file()
             qDebug() << "next:" << xml.name() << "error:" << xml.hasError();
         }
         displayEntityData(ui->cb_existense_entities->currentText());
+        isFileLoaded = true;
     }
     file->close();
 }
@@ -135,14 +163,22 @@ void Redactor::on_b_choose_file_clicked()
     it_not_choosen_file(); // First clear all data in areas
 
     fileName = QFileDialog::getOpenFileName
-            (this, tr("Открыть файл Игрового мира Ugozapad"), "./../", tr("Ugozapad World File (*.xml)"));
+            (this, *m_local.getCurrentTextLocale("#open_world_file"), "./../", tr("Ugozapad World File (*.xml)"));
 
     if (fileName == "") it_not_choosen_file(); else it_choosen_file();
 }
 
 void Redactor::on_action_about_triggered()
 {
-    QMessageBox::about(this, "О Redactor", "ver 0.01 alpha\nСделан GreMirid\nДля модифицирования уровней игрого движка Ugozapad");
+    QMessageBox::about
+    (
+         this,
+         *m_local.getCurrentTextLocale("#about"),
+         *m_local.getCurrentTextLocale("#about_expand_version") + " " +
+         iniSettings->value("Main/ver", "").toString() + " " +
+         *m_local.getCurrentTextLocale("#about_expand_version_comment") +
+         *m_local.getCurrentTextLocale("#about_expand_body")
+    );
 }
 
 void Redactor::on_cb_existense_entities_currentIndexChanged(const QString &arg1)
@@ -177,7 +213,7 @@ void Redactor::on_l_entities_currentRowChanged(int currentRow)
         {
             for (int arg_id = 0; arg_id < CurParam.argums.size(); arg_id++)
                 ui->l_args->addItem(CurParam.argums[arg_id].valuename);
-            ui->le_value_of_parametr->setText("Выберите Аргумент!");
+            ui->le_value_of_parametr->setText(*m_local.getCurrentTextLocale("#choose_arg"));
         }
         break;
     }
@@ -201,7 +237,7 @@ void Redactor::on_l_args_currentRowChanged(int currentRow)
 //Rewrite
 void Redactor::on_le_value_of_parametr_textChanged(const QString &arg1)
 {
-    if (arg1 != "" || arg1 != "Выберите Аргумент!")
+    if ((arg1 != "" || arg1 != *m_local.getCurrentTextLocale("#choose_arg")) && isFileLoaded)
     {
         switch (ui->l_entities->currentRow())
         {
@@ -225,81 +261,90 @@ void Redactor::on_le_value_of_parametr_textChanged(const QString &arg1)
 
 void Redactor::on_b_delete_entity_clicked()
 {
-    delete_entity(ui->cb_existense_entities->currentText());
-    ui->cb_existense_entities->removeItem(ui->cb_existense_entities->currentIndex());
-    displayEntityData(ui->cb_existense_entities->currentText());
+    if (isFileLoaded)
+    {
+        delete_entity(ui->cb_existense_entities->currentText());
+        ui->cb_existense_entities->removeItem(ui->cb_existense_entities->currentIndex());
+        displayEntityData(ui->cb_existense_entities->currentText());
+    }
 }
 
 void Redactor::on_b_add_entity_clicked()
 {
+    if (isFileLoaded)
+    {
 
+    }
 }
 
 void Redactor::on_b_save_level_clicked()
 {
-    //XML Writing
-    file->open(QIODevice::WriteOnly);
-
-    QXmlStreamWriter xmlWriter(file);
-    xmlWriter.setAutoFormatting(true);
-
-    xmlWriter.writeStartDocument();
-
-    //Let's start
-    xmlWriter.writeStartElement("Level");
-
-    //Descrition Level Section
-    xmlWriter.writeStartElement("Description");
-
-    xmlWriter.writeStartElement("SceneFile");
-    xmlWriter.writeAttribute("filename", ui->file_geometry->text());
-    xmlWriter.writeEndElement();
-
-    xmlWriter.writeStartElement("Skybox");
-    xmlWriter.writeAttribute("filename", ui->skybox_name->text());
-    xmlWriter.writeEndElement();
-
-    xmlWriter.writeEndElement();
-
-    //Entities Section
-    xmlWriter.writeStartElement("Entities");
-
-    for(int unit = 0; unit < m_entities.size(); unit++)
+    if (isFileLoaded)
     {
-        xmlWriter.writeStartElement("Entity");
+        //XML Writing
+        file->open(QIODevice::WriteOnly);
 
-        //Section, Name
-        xmlWriter.writeAttribute("section", m_entities[unit].classname);
-        xmlWriter.writeAttribute("name", m_entities[unit].name);
+        QXmlStreamWriter xmlWriter(file);
+        xmlWriter.setAutoFormatting(true);
 
-        //Transforms & Others
-        for (int u_params = 0; u_params < m_entities[unit].params.size(); u_params++)
+        xmlWriter.writeStartDocument();
+
+        //Let's start
+        xmlWriter.writeStartElement("Level");
+
+        //Descrition Level Section
+        xmlWriter.writeStartElement("Description");
+
+        xmlWriter.writeStartElement("SceneFile");
+        xmlWriter.writeAttribute("filename", ui->file_geometry->text());
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("Skybox");
+        xmlWriter.writeAttribute("filename", ui->skybox_name->displayText());
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeEndElement();
+
+        //Entities Section
+        xmlWriter.writeStartElement("Entities");
+
+        for(int unit = 0; unit < m_entities.size(); unit++)
         {
-            xmlWriter.writeStartElement(m_entities[unit].params[u_params].valuename);
-            for (int u_args = 0; u_args < m_entities[unit].params[u_params].argums.size(); u_args++)
+            xmlWriter.writeStartElement("Entity");
+
+            //Section, Name
+            xmlWriter.writeAttribute("section", m_entities[unit].classname);
+            xmlWriter.writeAttribute("name", m_entities[unit].name);
+
+            //Transforms & Others
+            for (int u_params = 0; u_params < m_entities[unit].params.size(); u_params++)
             {
-                xmlWriter.writeAttribute
-                (
-                    m_entities[unit].params[u_params].argums[u_args].valuename,
-                    m_entities[unit].params[u_params].argums[u_args].value
-                );
+                xmlWriter.writeStartElement(m_entities[unit].params[u_params].valuename);
+                for (int u_args = 0; u_args < m_entities[unit].params[u_params].argums.size(); u_args++)
+                {
+                    xmlWriter.writeAttribute
+                    (
+                        m_entities[unit].params[u_params].argums[u_args].valuename,
+                        m_entities[unit].params[u_params].argums[u_args].value
+                    );
+                }
+                xmlWriter.writeEndElement();
             }
+
+            //Custom Data
+            xmlWriter.writeStartElement("CustomData");
+            xmlWriter.writeEndElement();
+
             xmlWriter.writeEndElement();
         }
 
-        //Custom Data
-        xmlWriter.writeStartElement("CustomData");
+        xmlWriter.writeEndElement();
         xmlWriter.writeEndElement();
 
-        xmlWriter.writeEndElement();
+        xmlWriter.writeEndDocument();
+        file->close();
+
+        // Close World
+        it_not_choosen_file();
     }
-
-    xmlWriter.writeEndElement();
-    xmlWriter.writeEndElement();
-
-    xmlWriter.writeEndDocument();
-    file->close();
-
-    // Close World
-    it_not_choosen_file();
 }

@@ -21,11 +21,15 @@ private:
     QString fileName; //.xml file what we work for
     QFile* file;
 
+    bool isFileLoaded = false;
+
     void displayEntityData(const QString &data);
 
     void it_choosen_file();
     void it_not_choosen_file();
     void delete_entity(const QString &entityName); // from massive
+
+    void setLocaledText();
 
 private slots:
     void on_b_choose_file_clicked();
